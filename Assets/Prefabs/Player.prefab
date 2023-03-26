@@ -11,8 +11,10 @@ GameObject:
   - component: {fileID: 6759604785383761534}
   - component: {fileID: 6759604785383761409}
   - component: {fileID: 6759604785383761535}
-  - component: {fileID: -5156686347916785312}
   - component: {fileID: 6620105935750554721}
+  - component: {fileID: 5399604559714259365}
+  - component: {fileID: 7153676088712325877}
+  - component: {fileID: 4151145039055784595}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -103,19 +105,6 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
---- !u!114 &-5156686347916785312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6759604785383761408}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31c374014862043a1a4122a39e1c5fd9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spawnedObjectPrefab: {fileID: 4588963464382254765, guid: 338f6763faaeb43aa9d207779c7760a7, type: 3}
 --- !u!114 &6620105935750554721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,3 +131,48 @@ MonoBehaviour:
   ScaleThreshold: 0.01
   InLocalSpace: 0
   Interpolate: 1
+--- !u!114 &5399604559714259365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759604785383761408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 032089b039b8c411a9efa678d65cbcdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!50 &7153676088712325877
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759604785383761408}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!114 &4151145039055784595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759604785383761408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80d7c879794dfda4687da0e400131852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
