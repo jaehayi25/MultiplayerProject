@@ -45,8 +45,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a209ff1114e2b49ecb348f0fa6320e2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MazeHeight: 20
   m_MazeWidth: 30
+  m_MazeHeight: 20
+  m_Tilemap: {fileID: 0}
+  m_FloorTile: {fileID: 11400000, guid: dd3a3a2d7d9c14ca3996711d5d0e4d5f, type: 2}
+  m_WallTile: {fileID: 11400000, guid: f966a47083bc6496c922e0fa353972c8, type: 2}
 --- !u!114 &6535705434197744798
 MonoBehaviour:
   m_ObjectHideFlags: 0

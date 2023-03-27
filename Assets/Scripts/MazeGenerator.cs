@@ -2,122 +2,67 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.Tilemaps;
 using System;
 
 public class MazeGenerator : NetworkBehaviour
 {
-    [SerializeField] int m_MazeHeight;
     [SerializeField] int m_MazeWidth;
+    [SerializeField] int m_MazeHeight;
 
+    char[,] m_OldMaze;
     char[,] m_Maze;
-    int m_totalRooms;
-    List<Tuple<int, int>> m_walls = new List<Tuple<int, int>>();
-    Tuple<int, int>[,] m_group; 
+
+    [SerializeField] Tilemap m_wallTilemap;
+    public TileBase m_WallTile;
+
+    Vector3Int m_TilePos; 
 
     public override void OnNetworkSpawn()
     {
-        if (!IsServer) return;
-
-        KruskalMazeGenerator k = new KruskalMazeGenerator(10, 15);
-        k.GenerateMaze();
-        m_Maze = k.GetMaze();
-        DisplayMaze(); 
-
-        /*
-
-        m_Maze = new char[2 * m_MazeHeight + 1, 2 * m_MazeWidth + 1];
-        m_group = new Tuple<int, int>[2 * m_MazeHeight + 1, 2 * m_MazeWidth + 1];
-
-        //Initialize walls of maze
-        for (int i = 0; i < m_Maze.GetLength(0); i++)
+        base.OnNetworkSpawn();
+        // Only the server should update the tilemap
+        if (IsServer)
         {
-            for (int j = 0; j < m_Maze.GetLength(1); j++)
-            {
-                m_Maze[i, j] = '#'; 
-            }
+            m_wallTilemap.CompressBounds(); // Make sure the tilemap bounds are up to date
+            m_wallTilemap.RefreshAllTiles(); // Make sure all tiles are up to date
+
+            KruskalMazeGenerator k = new KruskalMazeGenerator(m_MazeWidth / 2, m_MazeHeight / 2);
+            k.GenerateMaze();
+            m_Maze = k.GetMaze();
         }
-
-        for (int i = 0; i < m_Maze.GetLength(0) - 1; i++)
-        {
-            for (int j = (i+1)%2; j < m_Maze.GetLength(1) - 1; j += 2)
-            {
-                m_Maze[i, j] = '?';
-                m_walls.Add(Tuple.Create(i, j));
-            }
-        }
-        m_walls.Shuffle();
-
-        //Initialize non-walls
-        m_totalRooms = 0; 
-        for (int i = 1; i < m_Maze.GetLength(0); i+=2)
-        {
-            for (int j = 1; j < m_Maze.GetLength(1); j+=2)
-            {
-                m_totalRooms++; 
-                m_Maze[i, j] = ' ';
-                m_group[i, j] = Tuple.Create(i, j); 
-            }
-        }
-
-        CreateMaze();
-
-        DisplayMaze();
-        */
     }
 
-    public void Union(Tuple<int, int> room1, Tuple<int, int> room2)
+    private void Update()
     {
-
-    }
-
-    public Tuple<int, int> Find(Tuple<int, int> room)
-    {
-        Tuple<int, int> parent = m_group[room.Item1, room.Item2];
-        if (room == parent)
+        if (IsServer)
         {
-            return room; 
-        }
-        return Find(parent); 
-    }
-
-    List<Tuple<int, int>> GetRoomsNextToWall(Tuple<int, int> wall)
-    {
-        List<Tuple<int, int>> rooms = new List<Tuple<int, int>>();
-
-        int row = wall.Item1;
-        int col = wall.Item2; 
-        if (row == 0) //rooms should be opposite side vertically
-        {
-            rooms.Add(Tuple.Create(0, col));
-            rooms.Add(Tuple.Create(m_MazeHeight - 2, col));
-        } else if (col == 0) //rooms should be opposite side horizontally
-        {
-            rooms.Add(Tuple.Create(row, 0));
-            rooms.Add(Tuple.Create(row, m_MazeWidth - 2));
-        } else if (row % 2 == 0) //wall connects rooms vertically
-        {
-            rooms.Add(Tuple.Create(row + 1, col));
-            rooms.Add(Tuple.Create(row - 1, col));
-        } else //wall connects room horizontally
-        {
-            rooms.Add(Tuple.Create(row, col - 1));
-            rooms.Add(Tuple.Create(row, col + 1));
-        }
-
-        return rooms; 
-    }
-
-    void CreateMaze()
-    {
-        for (int i = 0; i < m_walls.Count; i++)
-        {
-            List<Tuple<int, int>> adjRooms = GetRoomsNextToWall(m_walls[i]);
-
-            if (i % 100 == 0)
+            if (m_Maze != null)
             {
-                DisplayMaze(); 
+                for (int x = 0; x < m_Maze.GetLength(0); x++)
+                {
+                    for (int y = 0; y < m_Maze.GetLength(1); y++)
+                    {
+                        if (m_OldMaze == null || m_Maze[x, y] != m_OldMaze[x, y])
+                        {
+                            Vector3Int tilePos = new Vector3Int(x - m_MazeWidth/2, y - m_MazeHeight/2, 0);
+                            UpdateTilePosClientRpc(tilePos);
+                            if (m_Maze[x, y] == ' ')
+                            {
+                                m_wallTilemap.SetTile(m_TilePos, null); 
+                                //UpdateTileClientRpc(m_wallTilemap, tilePos, null); 
+                            }
+                            else if (m_Maze[x, y] == '#')
+                            {
+                                m_wallTilemap.SetTile(m_TilePos, m_WallTile);
+                                //UpdateTileClientRpc(m_wallTilemap, tilePos, m_WallTile);
+                            }
+                        }
+                    }
+                }
             }
         }
+        m_OldMaze = m_Maze;
     }
 
     void DisplayMaze()
@@ -134,24 +79,20 @@ public class MazeGenerator : NetworkBehaviour
         }
         Debug.Log(display);
     }
-}
 
-static class MyExtensions
-{
-    private static System.Random rng = new System.Random();
-
-    public static void Shuffle<T>(this IList<T> list)
+    [ClientRpc]
+    private void UpdateTilePosClientRpc(Vector3Int position)
     {
-        int n = list.Count;
-        while (n > 1)
-        {
-            n--;
-            int k = rng.Next(n + 1);
-            T value = list[k];
-            list[k] = list[n];
-            list[n] = value;
-        }
+        m_TilePos = position; 
     }
+
+    /*
+    [ClientRpc]
+    private void UpdateTileClientRpc(Tilemap tilemap, Vector3Int position, TileBase tile)
+    {
+        tilemap.SetTile(position, tile);
+    }
+    */
 }
 
 class KruskalMazeGenerator
