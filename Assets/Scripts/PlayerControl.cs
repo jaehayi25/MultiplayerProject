@@ -7,7 +7,7 @@ public class PlayerControl : NetworkBehaviour
 {
     Vector2 m_MoveDir = new Vector2(0, 0);
     Vector2 m_OldMoveDir = new Vector2(0, 0);
-    float m_MoveSpeed = 3f;
+    float m_MoveSpeed = 15;
 
     Rigidbody2D m_Rigidbody2D;
 
@@ -31,7 +31,7 @@ public class PlayerControl : NetworkBehaviour
 
     void UpdateServer()
     {
-        m_Rigidbody2D.position += m_MoveDir * m_MoveSpeed * Time.deltaTime;
+        m_Rigidbody2D.velocity = m_MoveDir * m_MoveSpeed;
     }
 
     void UpdateClient()
@@ -42,7 +42,7 @@ public class PlayerControl : NetworkBehaviour
         }
 
         //UpdateLocalPlayer
-        Vector2 moveDir = new Vector3(0, 0);
+        Vector2 moveDir = new Vector3(0, 0, 0);
 
         if (Input.GetKey(KeyCode.W)) moveDir.y = +1f;
         if (Input.GetKey(KeyCode.S)) moveDir.y = -1f;
