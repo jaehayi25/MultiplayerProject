@@ -1522,11 +1522,11 @@ PrefabInstance:
       objectReference: {fileID: 5627079189923043491, guid: 938737f1dddfc4d3580735bede8318f9, type: 3}
     - target: {fileID: 5115392699778482916, guid: 0439c5e6e01ea471fb7fd4e16a09ab7b, type: 3}
       propertyPath: m_MazeWidth
-      value: 30
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 5115392699778482916, guid: 0439c5e6e01ea471fb7fd4e16a09ab7b, type: 3}
       propertyPath: m_MazeHeight
-      value: 15
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 5115392699778482916, guid: 0439c5e6e01ea471fb7fd4e16a09ab7b, type: 3}
       propertyPath: m_MazePrefab
