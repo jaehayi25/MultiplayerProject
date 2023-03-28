@@ -18,51 +18,32 @@ public class MazeGenerator : NetworkBehaviour
     [SerializeField] private Transform m_MazeContainerPrefab; 
     [SerializeField] private Transform m_WallPrefab;
 
+    public List<Vector3Int> m_EmptySpaces { get; private set; }
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
         // Only the server should update maze data
         if (IsServer)
         {
+            m_EmptySpaces = new List<Vector3Int>(); 
+
             KruskalMazeGenerator k = new KruskalMazeGenerator(m_MazeWidth / 2, m_MazeHeight / 2);
             k.GenerateMaze();
             m_Maze = k.GetMaze();
 
             m_MazeContainerTransform = Instantiate(m_MazeContainerPrefab);
             m_MazeContainerTransform.GetComponent<NetworkObject>().Spawn(true);
+
+            UpdateMaze(); 
         }
     }
 
     private void Update()
     {
-        if (IsServer)
-        {
-            if (m_Maze != null)
-            {
-                for (int x = 0; x < m_Maze.GetLength(0); x++)
-                {
-                    for (int y = 0; y < m_Maze.GetLength(1); y++)
-                    {
-                        if (m_OldMaze == null || m_Maze[x, y] != m_OldMaze[x, y])
-                        {
-                            Vector3Int wallPos = new Vector3Int((x - m_MazeWidth/2) * gridScale, (y - m_MazeHeight/2) * gridScale, 0);
-                            if (m_Maze[x, y] == ' ') //maze space changed to empty
-                            {
-                                //
-                            }
-                            else if (m_Maze[x, y] == '#') //maze space changed to wall
-                            {
-                                Transform spawnedObjectTransform = Instantiate(m_WallPrefab, wallPos, Quaternion.identity);
-                                spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
-                                spawnedObjectTransform.GetComponent<NetworkObject>().TrySetParent(m_MazeContainerTransform);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        m_OldMaze = m_Maze;
+        //UpdateMaze();
     }
+    
 
     void DisplayMaze()
     {
@@ -77,6 +58,37 @@ public class MazeGenerator : NetworkBehaviour
             display += row + "\n"; 
         }
         Debug.Log(display);
+    }
+
+    private void UpdateMaze()
+    {
+        if (IsServer)
+        {
+            if (m_Maze != null)
+            {
+                for (int x = 0; x < m_Maze.GetLength(0); x++)
+                {
+                    for (int y = 0; y < m_Maze.GetLength(1); y++)
+                    {
+                        if (m_OldMaze == null || m_Maze[x, y] != m_OldMaze[x, y])
+                        {
+                            Vector3Int spacePos = new Vector3Int((x - m_MazeWidth / 2) * gridScale, (y - m_MazeHeight / 2) * gridScale, 0);
+                            if (m_Maze[x, y] == ' ') //maze space changed to empty
+                            {
+                                m_EmptySpaces.Add(spacePos); 
+                            }
+                            else if (m_Maze[x, y] == '#') //maze space changed to wall
+                            {
+                                Transform spawnedObjectTransform = Instantiate(m_WallPrefab, spacePos, Quaternion.identity);
+                                spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
+                                spawnedObjectTransform.GetComponent<NetworkObject>().TrySetParent(m_MazeContainerTransform);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        m_OldMaze = m_Maze;
     }
 }
 
@@ -146,6 +158,7 @@ class KruskalMazeGenerator
         {
             set[i] = i;
         }
+
         foreach (Tuple<int, int, int> wall in walls)
         {
             int x = wall.Item1;
