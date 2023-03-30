@@ -43,6 +43,14 @@ public class PlayerSpawnManager : NetworkBehaviour
             SpawnServerRpc();
         }
     }
+    
+    public void ResetPositionAtSpawn()
+    {
+        if (IsServer)
+        {
+            m_TeleportToSpawn = true; 
+        }
+    }
 
     [ServerRpc]
     private void SpawnServerRpc(ServerRpcParams serverRpcParams = default)

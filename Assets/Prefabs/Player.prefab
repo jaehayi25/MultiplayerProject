@@ -229,3 +229,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4708e877d36e4ebab9ad5f37439e618, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_TimesTagged:
+    m_InternalValue: 0
