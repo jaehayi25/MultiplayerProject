@@ -28,7 +28,7 @@ public class PlayerTagManager : NetworkBehaviour
         {
             OnBeingTagged();
         }
-
+        /*
         // Update the color based on who is tagger 
         if (IsHunter())
         {
@@ -38,9 +38,10 @@ public class PlayerTagManager : NetworkBehaviour
         {
             gameObject.GetComponent<SpriteRenderer>().color = Color.green;
         }
+        */
     }
 
-    private bool IsHunter()
+    public bool IsHunter()
     {
         return (int)OwnerClientId == m_TagSystem.m_CurrentHunterID.Value; 
     }

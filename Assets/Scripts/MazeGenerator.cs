@@ -12,7 +12,8 @@ public class MazeGenerator : NetworkBehaviour
     [SerializeField] int gridScale;
 
     char[,] m_OldMaze;
-    char[,] m_Maze;
+    public char[,] m_Maze; 
+    Transform[,] m_MazeWalls;
 
     Transform m_MazeContainerTransform; 
     [SerializeField] private Transform m_MazeContainerPrefab; 
@@ -31,6 +32,7 @@ public class MazeGenerator : NetworkBehaviour
             KruskalMazeGenerator k = new KruskalMazeGenerator(m_MazeWidth / 2, m_MazeHeight / 2);
             k.GenerateMaze();
             m_Maze = k.GetMaze();
+            m_MazeWalls = new Transform[m_Maze.GetLength(0), m_Maze.GetLength(1)];
 
             m_MazeContainerTransform = Instantiate(m_MazeContainerPrefab);
             m_MazeContainerTransform.GetComponent<NetworkObject>().Spawn(true);
@@ -75,13 +77,14 @@ public class MazeGenerator : NetworkBehaviour
                             Vector3Int spacePos = new Vector3Int((x - m_MazeWidth / 2) * gridScale, (y - m_MazeHeight / 2) * gridScale, 0);
                             if (m_Maze[x, y] == ' ') //maze space changed to empty
                             {
-                                m_EmptySpaces.Add(spacePos); 
+                                m_EmptySpaces.Add(spacePos);
                             }
                             else if (m_Maze[x, y] == '#') //maze space changed to wall
                             {
                                 Transform spawnedObjectTransform = Instantiate(m_WallPrefab, spacePos, Quaternion.identity);
                                 spawnedObjectTransform.GetComponent<NetworkObject>().Spawn(true);
                                 spawnedObjectTransform.GetComponent<NetworkObject>().TrySetParent(m_MazeContainerTransform);
+                                m_MazeWalls[x, y] = spawnedObjectTransform; 
                             }
                         }
                     }
@@ -89,6 +92,30 @@ public class MazeGenerator : NetworkBehaviour
             }
         }
         m_OldMaze = m_Maze;
+    }
+
+    public Vector2Int ConvertWorldPosToMazeCoord(Vector2 WorldPos)
+    {
+        int x = Mathf.RoundToInt(WorldPos.x / gridScale) + m_MazeWidth / 2;
+        int y = Mathf.RoundToInt(WorldPos.y / gridScale) + m_MazeHeight / 2;
+        return new Vector2Int(x, y); 
+    }
+
+    public bool IsWallAtWorldPos(Vector2 WorldPos)
+    {
+        Vector2Int MazeCoord = ConvertWorldPosToMazeCoord(WorldPos);
+        return m_MazeWalls[MazeCoord.x, MazeCoord.y] != null; 
+    }
+
+    public void RemoveWallAtWordPos(Vector2 WorldPos)
+    {
+        Vector2Int MazeCoord = ConvertWorldPosToMazeCoord(WorldPos);
+        if (MazeCoord.x > 0 && MazeCoord.y > 0 && MazeCoord.x < m_Maze.GetLength(0) - 1
+            && MazeCoord.y < m_Maze.GetLength(1) - 1 && m_MazeWalls[MazeCoord.x, MazeCoord.y] != null)
+        {
+            Destroy(m_MazeWalls[MazeCoord.x, MazeCoord.y].gameObject);
+        }
+        m_Maze[MazeCoord.x, MazeCoord.y] = ' ';
     }
 }
 
