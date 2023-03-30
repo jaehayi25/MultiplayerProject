@@ -14,7 +14,7 @@ public class PlayerControl : NetworkBehaviour
     private NetworkVariable<float> m_InvisibilityBuffTimer = new NetworkVariable<float>(0f);
     private NetworkVariable<float> m_InvisibilityBuffCD = new NetworkVariable<float>(0f);
 
-    private NetworkVariable<int> m_BlockBreakLimit = new NetworkVariable<int>(5);
+    private NetworkVariable<int> m_BlockBreakLimit = new NetworkVariable<int>(15);
 
     private Vector2 m_FacingDir = new Vector2(0, -1);
     private RaycastHit2D m_OneUnitHit;

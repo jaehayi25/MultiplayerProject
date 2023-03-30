@@ -114,6 +114,7 @@ public class MazeGenerator : NetworkBehaviour
             && MazeCoord.y < m_Maze.GetLength(1) - 1 && m_MazeWalls[MazeCoord.x, MazeCoord.y] != null)
         {
             Destroy(m_MazeWalls[MazeCoord.x, MazeCoord.y].gameObject);
+            m_MazeWalls[MazeCoord.x, MazeCoord.y] = null;
         }
         m_Maze[MazeCoord.x, MazeCoord.y] = ' ';
     }
